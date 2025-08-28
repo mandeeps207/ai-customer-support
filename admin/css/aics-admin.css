@@ -1,15 +1,39 @@
+/* --- Modern Admin UI/UX Improvements --- */
+
+body, .wp-admin, .wrap {
+    background: #f4f6fa;
+}
+
+.aics-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    padding: 24px 28px;
+    margin-bottom: 28px;
+}
+
+.aics-section-title {
+    font-size: 1.3em;
+    font-weight: 600;
+    color: #007cba;
+    margin-bottom: 12px;
+    letter-spacing: 0.5px;
+}
+
 /* Highlight the currently open chat in admin */
 .aics-active-chat {
     border: 2px solid #007cba !important;
-    background: #eaf6fb !important;
-    box-shadow: 0 2px 8px rgba(0,124,186,0.08);
+    background: linear-gradient(90deg, #eaf6fb 80%, #d2eafd 100%) !important;
+    box-shadow: 0 4px 16px rgba(0,124,186,0.10);
+    transition: box-shadow 0.2s, border 0.2s;
 }
+
 /* Unread message badge for active chats */
 .aics-unread-badge {
     display: inline-block;
     min-width: 22px;
     height: 22px;
-    background: #e74c3c;
+    background: linear-gradient(135deg, #e74c3c 60%, #ff7675 100%);
     color: #fff;
     font-size: 14px;
     font-weight: bold;
@@ -17,60 +41,413 @@
     text-align: center;
     line-height: 22px;
     margin-right: 4px;
-    box-shadow: 0 2px 8px rgba(231,76,60,0.12);
+    box-shadow: 0 2px 8px rgba(231,76,60,0.18);
     vertical-align: middle;
     border: 2px solid #fff;
+    letter-spacing: 0.5px;
+    transition: background 0.2s;
 }
+
 #aics-admin-online-toggle {
-    background: #007cba;
+    background: linear-gradient(90deg, #007cba 80%, #005a87 100%);
     color: #fff;
     border: none;
-    padding: 8px 18px;
-    border-radius: 4px;
-    font-size: 16px;
+    padding: 10px 26px;
+    border-radius: 6px;
+    font-size: 17px;
+    font-weight: 600;
     cursor: pointer;
-    margin-bottom: 10px;
-    transition: background 0.2s;
+    margin-bottom: 16px;
+    transition: background 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(0,124,186,0.10);
 }
 #aics-admin-online-toggle:hover {
     background: #005a87;
+    box-shadow: 0 4px 16px rgba(0,124,186,0.18);
 }
 
 #aics-admin-status-label {
     font-weight: bold;
-    margin-left: 10px;
+    margin-left: 14px;
     color: #008000;
+    font-size: 1.1em;
 }
 #aics-admin-status-label-offline {
     font-weight: bold;
-    margin-left: 10px;
+    margin-left: 14px;
     color: #b00;
+    font-size: 1.1em;
 }
 
-#aics-requests-list {
-    margin-top: 20px;
+#aics-requests-list, #aics-active-chats-list {
+    margin-top: 18px;
 }
+
 .aics-request {
     background: #f9f9f9;
-    border: 1px solid #e2e2e2;
-    border-radius: 4px;
-    padding: 12px 16px;
-    margin-bottom: 12px;
+    border: 1.5px solid #e2e2e2;
+    border-radius: 7px;
+    padding: 16px 20px;
+    margin-bottom: 14px;
+    transition: box-shadow 0.2s, border 0.2s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    position: relative;
+}
+.aics-request:hover {
+    border: 1.5px solid #007cba;
+    box-shadow: 0 4px 16px rgba(0,124,186,0.10);
+    background: #f1faff;
 }
 .aics-request .aics-request-header {
-    font-weight: bold;
-    margin-bottom: 6px;
+    font-weight: 600;
+    font-size: 1.08em;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
-.aics-request .aics-request-actions button {
-    background: #21759b;
+.aics-request .aics-request-actions button, .aics-open-chat-btn, .aics-accept-btn {
+    background: linear-gradient(90deg, #21759b 80%, #14506e 100%);
     color: #fff;
     border: none;
-    padding: 5px 12px;
-    border-radius: 3px;
-    margin-right: 6px;
+    padding: 7px 16px;
+    border-radius: 4px;
+    margin-right: 8px;
     cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    transition: background 0.2s, box-shadow 0.2s;
+    box-shadow: 0 1px 4px rgba(33,117,155,0.10);
+}
+.aics-request .aics-request-actions button:hover, .aics-open-chat-btn:hover, .aics-accept-btn:hover {
+    background: #14506e;
+    box-shadow: 0 2px 8px rgba(33,117,155,0.18);
+}
+
+/* Chat area improvements */
+#aics-agent-chat {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    padding: 20px 24px;
+    margin-top: 24px;
+}
+#aics-agent-messages {
+    height: 240px !important;
+    overflow-y: auto;
+    background: #f6f8fa;
+    border: 1.5px solid #e5e7eb;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    border-radius: 8px;
+    font-size: 15px;
+    color: #222;
+}
+#aics-agent-input {
+    width: 70%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1.5px solid #e5e7eb;
+    font-size: 15px;
+    margin-right: 8px;
+}
+#aics-agent-send-btn, #aics-agent-close-btn {
+    padding: 10px 22px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 500;
+    border: none;
+    margin-left: 0;
+    margin-right: 8px;
+    cursor: pointer;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+#aics-agent-send-btn {
+    background: linear-gradient(90deg, #007cba 80%, #005a87 100%);
+    color: #fff;
+    box-shadow: 0 1px 4px rgba(0,124,186,0.10);
+}
+#aics-agent-send-btn:hover {
+    background: #005a87;
+    box-shadow: 0 2px 8px rgba(0,124,186,0.18);
+}
+#aics-agent-close-btn {
+    background: linear-gradient(90deg, #b00 80%, #e74c3c 100%);
+    color: #fff;
+    box-shadow: 0 1px 4px rgba(231,76,60,0.10);
+}
+#aics-agent-close-btn:hover {
+    background: #a00;
+    box-shadow: 0 2px 8px rgba(231,76,60,0.18);
+}
+#aics-agent-closed-msg {
+    color: #b00;
+    margin-top: 12px;
+    font-weight: 600;
+    font-size: 1.08em;
+}
+
+/* --- Chat Archives Page Styles --- */
+.aics-archives-wrap {
+    background: #f4f6fa;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.aics-page-title {
+    color: #007cba;
+    font-size: 2em;
+    margin-bottom: 24px;
+}
+
+.aics-archives-controls {
+    background: #fff;
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    margin-bottom: 24px;
+}
+
+.aics-search-section {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.aics-search-input {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px 14px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 15px;
+}
+
+.aics-filter-select, .aics-date-input {
+    padding: 10px 12px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 14px;
+    min-width: 120px;
+}
+
+.aics-search-btn, .aics-clear-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.aics-search-btn {
+    background: linear-gradient(90deg, #007cba 80%, #005a87 100%);
+    color: #fff;
+}
+
+.aics-search-btn:hover {
+    background: #005a87;
+}
+
+.aics-clear-btn {
+    background: #f1f3f4;
+    color: #333;
+    border: 1px solid #ddd;
+}
+
+.aics-clear-btn:hover {
+    background: #e8eaed;
+}
+
+.aics-archives-results {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    overflow: hidden;
+}
+
+.aics-loading {
+    padding: 40px;
+    text-align: center;
+    color: #666;
+    font-size: 16px;
+}
+
+.aics-spinner {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #007cba;
+    border-radius: 50%;
+    animation: aics-spin 1s linear infinite;
+    margin-right: 10px;
+}
+
+@keyframes aics-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.aics-chat-item {
+    border-bottom: 1px solid #f0f2f5;
+    padding: 20px 24px;
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+.aics-chat-item:hover {
+    background: #f8fafc;
+}
+
+.aics-chat-item:last-child {
+    border-bottom: none;
+}
+
+.aics-chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.aics-chat-id {
+    font-weight: 600;
+    color: #007cba;
+    font-size: 16px;
+}
+
+.aics-chat-date {
+    color: #666;
     font-size: 14px;
 }
-.aics-request .aics-request-actions button:hover {
-    background: #14506e;
+
+.aics-chat-preview {
+    color: #555;
+    font-size: 14px;
+    line-height: 1.4;
+    margin-top: 8px;
+}
+
+.aics-chat-stats {
+    display: flex;
+    gap: 16px;
+    margin-top: 10px;
+    font-size: 13px;
+    color: #888;
+}
+
+.aics-pagination {
+    padding: 20px;
+    text-align: center;
+    border-top: 1px solid #f0f2f5;
+}
+
+.aics-pagination button {
+    background: #f1f3f4;
+    border: 1px solid #ddd;
+    padding: 8px 12px;
+    margin: 0 2px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.aics-pagination button:hover {
+    background: #e8eaed;
+}
+
+.aics-pagination button.active {
+    background: #007cba;
+    color: #fff;
+    border-color: #007cba;
+}
+
+.aics-modal {
+    position: fixed;
+    z-index: 100000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+}
+
+.aics-modal-content {
+    background: #fff;
+    margin: 5% auto;
+    width: 80%;
+    max-width: 800px;
+    border-radius: 8px;
+    max-height: 80vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.aics-modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8fafc;
+}
+
+.aics-close-modal {
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+}
+
+.aics-close-modal:hover {
+    color: #333;
+}
+
+.aics-modal-messages {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.aics-message-item {
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    max-width: 70%;
+}
+
+.aics-message-item.user {
+    background: #e3f2fd;
+    margin-left: auto;
+    text-align: right;
+}
+
+.aics-message-item.agent {
+    background: #f3e5f5;
+}
+
+.aics-message-item.bot {
+    background: #e8f5e8;
+}
+
+.aics-message-sender {
+    font-weight: 600;
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+
+.aics-message-text {
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.aics-message-time {
+    font-size: 11px;
+    color: #888;
+    margin-top: 4px;
 }

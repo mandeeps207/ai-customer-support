@@ -15,6 +15,9 @@ define( 'AICS_URL', plugin_dir_url( __FILE__ ) );
 // Load core
 require_once AICS_DIR . 'includes/class-aics-core.php';
 
+// Install DB tables on activation
+register_activation_hook(__FILE__, ['AICS_Core', 'install_tables']);
+
 // Init
 add_action( 'plugins_loaded', function() {
     AICS_Core::instance()->run();

@@ -24,7 +24,7 @@ jQuery(function ($) {
 
     // 3. Listen for admin online status
     let aicsIsAgentOnline = false;
-    let aicsChatStatus = null;
+    let aicsChatStatus = null; // Track current chat status
     function updateAgentConnectedMsg() {
         if (aicsChatStatus === 'active' && aicsIsAgentOnline) {
             $('#aics-agent-connected-msg').show();
@@ -95,31 +95,30 @@ jQuery(function ($) {
         const text = $('#aics-user-input').val().trim();
         if (!text) return;
         $('#aics-user-input').val('');
+        const ts = Date.now();
         db.ref('chats/' + chatId + '/messages').push({
             sender: 'user',
             text: text,
-            ts: Date.now()
+            ts: ts
+        });
+        // Save to wpdb via AJAX
+        $.post(AICS_Config.ajaxUrl, {
+            action: 'aics_save_message',
+            security: AICS_Config.nonce,
+            chat_id: chatId,
+            sender: 'user',
+            text: text,
+            ts: ts
         });
 
-        // If user requests agent
-        if (/agent|human|live/i.test(text)) {
-            db.ref('chats/' + chatId + '/status').set('waiting');
-            db.ref('requests/' + chatId).set({
-                user: {},
-                status: 'pending',
-                started_at: Date.now()
-            });
-            $('#aics-status').text('Waiting for agent...');
-            return;
-        }
-
-        // Check chat status before sending to AI
+        // Check chat status before sending to AI - ensure agent is not active
         db.ref('chats/' + chatId + '/status').once('value').then(function(snap) {
-            if (snap.val() === 'active') {
-                // Agent is connected, do not send to AI
+            const currentStatus = snap.val();
+            if (currentStatus === 'active' || currentStatus === 'waiting') {
+                // Agent is connected or user is waiting for agent, do not send to AI
                 return;
             }
-            // Otherwise, send to AI
+            // Only send to AI if chat is new/inactive and no agent is involved
             $.post(AICS_Config.ajaxUrl, {
                 action: 'aics_server_ai',
                 security: AICS_Config.nonce,
@@ -127,10 +126,16 @@ jQuery(function ($) {
                 chat_id: chatId
             }).done(function (res) {
                 if (res.success && res.data.reply) {
-                    db.ref('chats/' + chatId + '/messages').push({
-                        sender: 'bot',
-                        text: res.data.reply,
-                        ts: Date.now()
+                    // Double-check status before adding AI reply to prevent race conditions
+                    db.ref('chats/' + chatId + '/status').once('value').then(function(statusSnap) {
+                        const latestStatus = statusSnap.val();
+                        if (latestStatus !== 'active' && latestStatus !== 'waiting') {
+                            db.ref('chats/' + chatId + '/messages').push({
+                                sender: 'bot',
+                                text: res.data.reply,
+                                ts: Date.now()
+                            });
+                        }
                     });
                 }
             });
@@ -213,4 +218,6 @@ jQuery(function ($) {
     $('#aics-chat-launcher').on('click', function() {
         $('#aics-chatbox-wrapper').fadeToggle(200);
     });
+
+    // Optionally, auto-open chatbox on first message or certain triggers
 });
