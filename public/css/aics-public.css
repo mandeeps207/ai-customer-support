@@ -1,0 +1,332 @@
+#aics-contact-form-overlay {
+    position: absolute;
+    bottom: 0px;
+    left: 0;
+    width: 100%;
+    background: rgba(246, 248, 250, 0.98);
+    z-index: 10001;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    box-sizing: border-box;
+    border-top: 1px solid #e9e9e9;
+}
+
+.aics-contact-form-overlay-inner {
+    padding: 24px 18px 18px 18px;
+    width: 95%;
+    max-width: 320px;
+    position: relative;
+}
+
+.aics-close-contact-form-btn {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    background: none;
+    border: none;
+    font-size: 28px;
+    color: #888;
+    cursor: pointer;
+    z-index: 2;
+    line-height: 1;
+    padding: 0;
+    transition: color 0.18s;
+}
+.aics-close-contact-form-btn:hover {
+    color: #007cba;
+}
+
+#aics-chatbox {
+    position: fixed;
+    /* ...existing code... */
+    overflow: visible;
+}
+#aics-online-status-notification.aics-status-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    border-radius: 3px 20px 20px 3px;
+    padding: 4px 16px 4px 8px;
+    margin-bottom: 6px;
+    box-shadow: 0 2px 8px rgba(0, 124, 186, 0.06);
+    border: 1.5px solid #e5e7eb;
+    min-width: 120px;
+    width: fit-content;
+    transition: background 0.18s, border 0.18s;
+}
+
+.aics-status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    background: #bdbdbd;
+    box-shadow: 0 0 0 2px #fff;
+    transition: background 0.18s;
+}
+.aics-status-pill.aics-online .aics-status-dot {
+    background: #1ec773;
+}
+.aics-status-pill.aics-offline .aics-status-dot {
+    background: #e74c3c;
+}
+.aics-status-pill.aics-online {
+    background: #e7ffe7;
+    border-color: #b6e7c2;
+    color: #007c2a;
+}
+.aics-status-pill.aics-offline {
+    background: #fff3f3;
+    border-color: #f5c6cb;
+    color: #b00;
+}
+#aics-chatbox-header {
+    background: #007cba;
+    color: #fff;
+    padding: 18px 16px 10px 16px;
+    border-radius: 18px 18px 0 0;
+    text-align: left;
+}
+
+.aics-chatbox-title {
+    margin: 0 0 6px 0;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.aics-chatbox-welcome {
+    font-size: 15px;
+    font-weight: 400;
+    color: #e6f4fa;
+    margin-bottom: 2px;
+}
+#aics-show-contact-form-btn {
+    background: linear-gradient(90deg, #007cba 60%, #005a87 100%);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 22px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.18s, box-shadow 0.18s;
+    box-shadow: 0 2px 8px rgba(0,124,186,0.08);
+    margin: 0 auto;
+    display: block;
+}
+
+#aics-show-contact-form-btn:hover {
+    opacity: .9;
+}
+#aics-chat-launcher {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    width: 56px;
+    height: 56px;
+    background: #007cba;
+    border-radius: 50%;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10000;
+    transition: background 0.2s;
+}
+
+#aics-chat-launcher:hover {
+    background: #005a87;
+}
+
+#aics-chatbox {
+    position: fixed;
+    bottom: 100px;
+    right: 32px;
+    width: 340px;
+    max-width: 95vw;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 1.5px 6px rgba(0,0,0,0.08);
+    font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+}
+
+#aics-messages {
+    flex: 1 1 auto;
+    padding: 18px 16px 10px 16px;
+    overflow-y: auto;
+    background: #f6f8fa;
+    min-height: 180px;
+    max-height: 320px;
+    font-size: 15px;
+}
+
+.aics-message {
+    margin-bottom: 12px;
+    display: flex;
+    align-items: flex-end;
+}
+
+.aics-message.user {
+    justify-content: flex-end;
+}
+
+.aics-message.bot, .aics-message.agent {
+    justify-content: flex-start;
+}
+
+.aics-bubble {
+    padding: 5px 15px;
+    border-radius: 15px;
+    max-width: 80%;
+    word-break: break-word;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.aics-message.user .aics-bubble {
+    background: #007cba;
+    color: #fff;
+    border-bottom-right-radius: 3px;
+}
+
+.aics-message.bot .aics-bubble {
+    background: #e5e7eb;
+    color: #222;
+    border-bottom-left-radius: 6px;
+}
+
+.aics-message.agent .aics-bubble {
+    background: #ffe9b3;
+    color: #7a5a00;
+    border-bottom-left-radius: 3px;
+}
+
+#aics-status,
+#aics-chat-closed-msg,
+#aics-agent-connected-msg {
+    padding: 8px 16px;
+    font-size: 14px;
+    color: #b00;
+    background: #fff3f3;
+    border-left: 3px solid #b00;
+    margin: 0 0 8px 0;
+    border-radius: 0 8px 8px 0;
+    display: none;
+}
+
+#aics-chat-closed-msg {
+    color: #b00;
+    background: #fff3f3;
+    border-left: 3px solid #b00;
+    display: none;
+}
+
+#aics-agent-connected-msg {
+    color: #007c2a;
+    background: #e7ffe7;
+    border-left: 3px solid #007c2a;
+    display: none;
+}
+
+#aics-input-row {
+    display: flex;
+    background: #fff;
+    margin-bottom: 20px;
+}
+
+#aics-user-input {
+    flex: 1 1 auto;
+    border: 0;
+    padding: 10px;
+    font-size: 15px;
+    background: #e9e9e9;
+    transition: border 0.2s;
+}
+
+#aics-user-input:focus {
+    outline: none;
+}
+
+#aics-contact-form {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+}
+
+#aics-send-btn,
+#aics-connect-agent-btn,
+#aics-contact-form button {
+    background: linear-gradient(90deg, #007cba 60%, #005a87 100%);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 22px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.18s, box-shadow 0.18s;
+    box-shadow: 0 2px 8px rgba(0,124,186,0.08);
+}
+
+#aics-send-btn {
+    border-radius: 0;
+    margin-bottom: 0;
+}
+
+#aics-send-btn:disabled,
+#aics-connect-agent-btn:disabled,
+#aics-contact-form button:disabled {
+    background: #b5c6d6;
+    cursor: not-allowed;
+}
+
+#aics-send-btn:hover,
+#aics-connect-agent-btn:hover,
+#aics-contact-form button:hover {
+    opacity: .9;
+}
+
+#aics-contact-form-row, #aics-connect-agent-row {
+    padding: 10px 16px 16px;
+    margin-top: -10px;
+    text-align: center;
+}
+
+#aics-contact-form input,
+#aics-contact-form textarea {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 8px;
+    font-size: 15px;
+    background: #fff;
+    transition: border 0.2s;
+}
+
+#aics-contact-form textarea {
+    min-height: 60px;
+    resize: vertical;
+}
+
+@media (max-width: 500px) {
+    #aics-chatbox {
+        width: 98vw;
+        right: 1vw;
+        bottom: 1vw;
+        border-radius: 10px;
+    }
+    #aics-messages {
+        max-height: 180px;
+    }
+}

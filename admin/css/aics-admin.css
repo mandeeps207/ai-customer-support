@@ -1,0 +1,76 @@
+/* Highlight the currently open chat in admin */
+.aics-active-chat {
+    border: 2px solid #007cba !important;
+    background: #eaf6fb !important;
+    box-shadow: 0 2px 8px rgba(0,124,186,0.08);
+}
+/* Unread message badge for active chats */
+.aics-unread-badge {
+    display: inline-block;
+    min-width: 22px;
+    height: 22px;
+    background: #e74c3c;
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 22px;
+    margin-right: 4px;
+    box-shadow: 0 2px 8px rgba(231,76,60,0.12);
+    vertical-align: middle;
+    border: 2px solid #fff;
+}
+#aics-admin-online-toggle {
+    background: #007cba;
+    color: #fff;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: background 0.2s;
+}
+#aics-admin-online-toggle:hover {
+    background: #005a87;
+}
+
+#aics-admin-status-label {
+    font-weight: bold;
+    margin-left: 10px;
+    color: #008000;
+}
+#aics-admin-status-label-offline {
+    font-weight: bold;
+    margin-left: 10px;
+    color: #b00;
+}
+
+#aics-requests-list {
+    margin-top: 20px;
+}
+.aics-request {
+    background: #f9f9f9;
+    border: 1px solid #e2e2e2;
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+}
+.aics-request .aics-request-header {
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+.aics-request .aics-request-actions button {
+    background: #21759b;
+    color: #fff;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 3px;
+    margin-right: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+.aics-request .aics-request-actions button:hover {
+    background: #14506e;
+}
