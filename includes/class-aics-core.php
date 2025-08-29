@@ -135,9 +135,10 @@ class AICS_Core {
         $project_id = get_option('aics_firebase_project_id', '');
         wp_enqueue_style( 'aics-public', AICS_URL . 'public/css/aics-public.css', [], '1.0.0' );
         wp_enqueue_script( 'firebase-app', 'https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js', [], null, true );
-        wp_enqueue_script( 'firebase-database', 'https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js', [], null, true );
+        wp_enqueue_script( 'firebase-auth', 'https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js', [ 'firebase-app' ], null, true );
+        wp_enqueue_script( 'firebase-database', 'https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js', [ 'firebase-app', 'firebase-auth' ], null, true );
         wp_enqueue_script( 'fontawesome_icons', 'https://kit.fontawesome.com/1ad78acfd0.js', [], null, true );
-        wp_enqueue_script( 'aics-public', AICS_URL . 'public/js/aics-public.js', [ 'jquery', 'firebase-app', 'firebase-database' ], '1.0.0', true );
+        wp_enqueue_script( 'aics-public', AICS_URL . 'public/js/aics-public.js', [ 'jquery', 'firebase-app', 'firebase-auth', 'firebase-database' ], '1.0.0', true );
         wp_localize_script( 'aics-public', 'AICS_Config', [
             'apiKey'    => $api_key,
             'projectId' => $project_id,
@@ -151,13 +152,27 @@ class AICS_Core {
         $project_id = get_option('aics_firebase_project_id', '');
         wp_enqueue_style( 'aics-admin', AICS_URL . 'admin/css/aics-admin.css', [], '1.0.0' );
         wp_enqueue_script( 'firebase-app', 'https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js', [], null, true );
-        wp_enqueue_script( 'firebase-database', 'https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js', [], null, true );
-        wp_enqueue_script( 'aics-admin', AICS_URL . 'admin/js/aics-admin.js', [ 'jquery', 'firebase-app', 'firebase-database' ], '1.0.0', true );
+        wp_enqueue_script( 'firebase-auth', 'https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js', [ 'firebase-app' ], null, true );
+        wp_enqueue_script( 'firebase-database', 'https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js', [ 'firebase-app', 'firebase-auth' ], null, true );
+        wp_enqueue_script( 'aics-admin', AICS_URL . 'admin/js/aics-admin.js', [ 'jquery', 'firebase-app', 'firebase-auth', 'firebase-database' ], '1.0.0', true );
+
+        // Fetch Firebase custom token for admin
+        $token = '';
+        if (current_user_can('manage_options')) {
+            $response = wp_remote_get( rest_url('aics/v1/firebase-token') );
+            if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200) {
+                $body = json_decode(wp_remote_retrieve_body($response), true);
+                if (!empty($body['token'])) {
+                    $token = $body['token'];
+                }
+            }
+        }
         wp_localize_script( 'aics-admin', 'AICS_Admin_Config', [
             'apiKey'    => $api_key,
             'projectId' => $project_id,
             'ajaxUrl'   => admin_url( 'admin-ajax.php' ),
             'nonce'     => wp_create_nonce( 'aics_nonce' ),
+            'firebaseCustomToken' => $token,
         ]);
     }
 

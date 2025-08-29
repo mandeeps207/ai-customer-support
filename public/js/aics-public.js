@@ -1,9 +1,17 @@
 jQuery(function ($) {
+
     // Only initialize if config is present
     if (!AICS_Config.apiKey || !AICS_Config.projectId) {
         // Optionally show a message in the UI for admins
         return;
     }
+
+    // Check if firebase.auth is loaded, if not, show error
+    if (typeof firebase.auth !== 'function') {
+        console.error('Firebase Auth SDK is not loaded. Please ensure firebase-auth.js is enqueued.');
+        return;
+    }
+
 
     // 1. Firebase init
     const cfg = {
@@ -14,6 +22,24 @@ jQuery(function ($) {
     let app;
     try { app = firebase.app(); } catch (e) { app = firebase.initializeApp(cfg); }
     const db = firebase.database(app);
+
+    // 1a. Firebase Auth: Sign in anonymously if not already signed in
+    firebase.auth().onAuthStateChanged(function(user) {
+        if (!user) {
+            firebase.auth().signInAnonymously().catch(function(error) {
+                console.error('Firebase auth error:', error);
+            });
+        }
+    });
+
+    // 0. Firebase Auth: Sign in anonymously if not already signed in
+    firebase.auth().onAuthStateChanged(function(user) {
+        if (!user) {
+            firebase.auth().signInAnonymously().catch(function(error) {
+                console.error("Firebase auth error:", error);
+            });
+        }
+    });
 
     // 2. Chat ID
     let chatId = localStorage.getItem('aics_chat_id');

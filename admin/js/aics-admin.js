@@ -1,6 +1,20 @@
 jQuery(function ($) {
+
     if (!AICS_Admin_Config.apiKey || !AICS_Admin_Config.projectId) {
         return;
+    }
+
+    // Authenticate as admin using Firebase custom token
+    if (AICS_Admin_Config.firebaseCustomToken) {
+        firebase.auth().signInWithCustomToken(AICS_Admin_Config.firebaseCustomToken)
+            .then(function() {
+                console.log('Signed in to Firebase as WordPress admin.');
+            })
+            .catch(function(error) {
+                console.error('Firebase admin sign-in error:', error);
+            });
+    } else {
+        console.warn('No Firebase custom token found for admin. Some features may not work.');
     }
 
     // 1. Firebase init
