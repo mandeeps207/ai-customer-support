@@ -13,18 +13,50 @@ jQuery(function ($) {
     try { app = firebase.app(); } catch (e) { app = firebase.initializeApp(cfg); }
     const db = firebase.database(app);
 
-    // 2. Authenticate admin using Firebase custom token
-    if (AICS_Admin_Config.firebaseCustomToken) {
-        firebase.auth().signInWithCustomToken(AICS_Admin_Config.firebaseCustomToken)
-            .then(function() {
-                console.log('Signed in to Firebase as WordPress admin.');
-            })
-            .catch(function(error) {
-                console.error('Firebase admin sign-in error:', error);
-            });
-    } else {
-        console.warn('No Firebase custom token found for admin. Some features may not work.');
+    // Function to fetch the Firebase custom token from your WP endpoint
+    async function getFirebaseCustomToken() {
+    // Check if the necessary configuration is available
+    if ( ! AICS_Admin_Config || ! AICS_Admin_Config.nonce ) {
+        console.error('REST API configuration not available.');
+        return null;
     }
+
+    try {
+        const response = await fetch(AICS_REST_Config.rootUrl + 'aics/v1/firebase-token', {
+            method: 'GET',
+            headers: {
+                'X-WP-Nonce': AICS_REST_Config.nonce,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if ( ! response.ok ) {
+            const error = await response.json();
+            throw new Error(error.message);
+        }
+
+        const data = await response.json();
+        return data.token;
+    } catch (error) {
+        console.error('Failed to get Firebase custom token:', error);
+        return null;
+    }
+}
+
+    // 2. Authenticate admin using Firebase custom token
+    getFirebaseCustomToken().then(firebaseCustomToken => {
+        if (firebaseCustomToken) {
+            firebase.auth().signInWithCustomToken(firebaseCustomToken)
+                .then(() => {
+                    console.log('Signed in to Firebase as WordPress admin.');
+                })
+                .catch(error => {
+                    console.error('Firebase admin sign-in error:', error);
+                });
+        } else {
+            console.warn('No Firebase custom token found for admin. Some features may not work.');
+        }
+    });
 
     // 2. Online/Offline toggle
     let isAdminOnline = false;

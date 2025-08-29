@@ -14,7 +14,6 @@ add_action('rest_api_init', function() {
 });
 
 function aics_generate_firebase_custom_token(WP_REST_Request $request) {
-    error_log('token generation started');
     $user = wp_get_current_user();
     if (!$user || !$user->ID) {
         return new WP_Error('not_logged_in', 'User not logged in', ['status' => 403]);
@@ -41,8 +40,6 @@ function aics_generate_firebase_custom_token(WP_REST_Request $request) {
     ];
 
     $token = $auth->createCustomToken($uid, $customClaims);
-
-    error_log('Token:' . $token->toString());
 
     return [ 'token' => $token->toString() ];
 }

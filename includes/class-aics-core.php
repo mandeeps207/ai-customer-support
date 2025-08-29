@@ -178,6 +178,14 @@ class AICS_Core {
             'nonce'     => wp_create_nonce( 'aics_nonce' ),
             'firebaseCustomToken' => $token,
         ]);
+
+        // Localize script for REST API requests for logged-in users
+        if ( current_user_can( 'manage_options' ) ) {
+            wp_localize_script( 'aics-admin', 'AICS_REST_Config', [
+                'rootUrl' => esc_url_raw( rest_url() ),
+                'nonce' => wp_create_nonce( 'wp_rest' ), // Nonce for REST API
+            ]);
+        }
     }
 
     public function render_chat_shortcode() {

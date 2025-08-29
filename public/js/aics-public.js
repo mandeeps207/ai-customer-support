@@ -32,15 +32,6 @@ jQuery(function ($) {
         }
     });
 
-    // 0. Firebase Auth: Sign in anonymously if not already signed in
-    firebase.auth().onAuthStateChanged(function(user) {
-        if (!user) {
-            firebase.auth().signInAnonymously().catch(function(error) {
-                console.error("Firebase auth error:", error);
-            });
-        }
-    });
-
     // 2. Chat ID
     let chatId = localStorage.getItem('aics_chat_id');
     if (!chatId) {
