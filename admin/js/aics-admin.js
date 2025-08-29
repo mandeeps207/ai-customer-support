@@ -1,20 +1,6 @@
 jQuery(function ($) {
-
     if (!AICS_Admin_Config.apiKey || !AICS_Admin_Config.projectId) {
         return;
-    }
-
-    // Authenticate as admin using Firebase custom token
-    if (AICS_Admin_Config.firebaseCustomToken) {
-        firebase.auth().signInWithCustomToken(AICS_Admin_Config.firebaseCustomToken)
-            .then(function() {
-                console.log('Signed in to Firebase as WordPress admin.');
-            })
-            .catch(function(error) {
-                console.error('Firebase admin sign-in error:', error);
-            });
-    } else {
-        console.warn('No Firebase custom token found for admin. Some features may not work.');
     }
 
     // 1. Firebase init
@@ -26,6 +12,19 @@ jQuery(function ($) {
     let app;
     try { app = firebase.app(); } catch (e) { app = firebase.initializeApp(cfg); }
     const db = firebase.database(app);
+
+    // 2. Authenticate admin using Firebase custom token
+    if (AICS_Admin_Config.firebaseCustomToken) {
+        firebase.auth().signInWithCustomToken(AICS_Admin_Config.firebaseCustomToken)
+            .then(function() {
+                console.log('Signed in to Firebase as WordPress admin.');
+            })
+            .catch(function(error) {
+                console.error('Firebase admin sign-in error:', error);
+            });
+    } else {
+        console.warn('No Firebase custom token found for admin. Some features may not work.');
+    }
 
     // 2. Online/Offline toggle
     let isAdminOnline = false;
@@ -161,20 +160,10 @@ jQuery(function ($) {
         const text = $('#aics-agent-input').val().trim();
         if (!text) return;
         $('#aics-agent-input').val('');
-        const ts = Date.now();
         db.ref('chats/' + activeChatId + '/messages').push({
             sender: 'agent',
             text: text,
-            ts: ts
-        });
-        // Save to wpdb via AJAX
-        $.post(AICS_Admin_Config.ajaxUrl, {
-            action: 'aics_save_message',
-            security: AICS_Admin_Config.nonce,
-            chat_id: activeChatId,
-            sender: 'agent',
-            text: text,
-            ts: ts
+            ts: Date.now()
         });
     }
 
@@ -204,7 +193,7 @@ jQuery(function ($) {
             const $active = $(`
                 <div class="aics-request" id="aics-active-chat-${chatId}">
                     <div class="aics-request-header">
-                        <strong>Active Chat ID: ${chatId}</strong>
+                        <strong>Active Chat ID:</strong> ${chatId}
                         <span class="aics-badge-wrap" style="float:right;display:inline-flex;align-items:center;gap:8px;">
                             <span class="aics-unread-badge" id="aics-unread-badge-${chatId}" style="display:none;">0</span>
                             <button class="aics-open-chat-btn" data-chat-id="${chatId}">Open</button>
@@ -310,145 +299,4 @@ jQuery(function ($) {
             }
         });
     });
-});
-
-// Chat Archives JavaScript
-jQuery(document).ready(function($) {
-    // Only initialize archive functionality on archive page
-    if (!$('#aics-archives-results').length) return;
-    
-    let currentPage = 1;
-    const perPage = 10;
-    
-    function loadChats(page = 1, search = '', sender = '', dateFrom = '', dateTo = '') {
-        $('#aics-loading').show();
-        $('#aics-chats-list, #aics-pagination').empty();
-        
-        $.post(ajaxurl, {
-            action: 'aics_search_archives',
-            security: AICS_Admin_Config.nonce,
-            page: page,
-            per_page: perPage,
-            search: search,
-            sender: sender,
-            date_from: dateFrom,
-            date_to: dateTo
-        }).done(function(response) {
-            $('#aics-loading').hide();
-            if (response.success) {
-                displayChats(response.data.chats);
-                displayPagination(response.data.pagination);
-            }
-        });
-    }
-    
-    function displayChats(chats) {
-        const $list = $('#aics-chats-list');
-        if (chats.length === 0) {
-            $list.html('<div style="padding:40px;text-align:center;color:#666;">No chats found.</div>');
-            return;
-        }
-        
-        chats.forEach(chat => {
-            const $item = $(`
-                <div class="aics-chat-item" data-chat-id="${chat.chat_id}">
-                    <div class="aics-chat-header">
-                        <span class="aics-chat-id">${chat.chat_id}</span>
-                        <span class="aics-chat-date">${new Date(chat.started_at).toLocaleString()}</span>
-                    </div>
-                    <div class="aics-chat-preview">${chat.first_message || 'No messages'}</div>
-                    <div class="aics-chat-stats">
-                        <span>Messages: ${chat.message_count}</span>
-                        <span>Status: ${chat.status}</span>
-                    </div>
-                </div>
-            `);
-            $list.append($item);
-        });
-    }
-    
-    function displayPagination(pagination) {
-        const $pagination = $('#aics-pagination');
-        if (pagination.total_pages <= 1) return;
-        
-        for (let i = 1; i <= pagination.total_pages; i++) {
-            const $btn = $(`<button class="page-btn ${i === pagination.current_page ? 'active' : ''}" data-page="${i}">${i}</button>`);
-            $pagination.append($btn);
-        }
-    }
-    
-    function loadChatMessages(chatId) {
-        $('#aics-modal-title').text(`Chat: ${chatId}`);
-        $('#aics-modal-messages').html('<div style="text-align:center;padding:20px;">Loading messages...</div>');
-        $('#aics-chat-modal').show();
-        
-        $.post(ajaxurl, {
-            action: 'aics_get_chat_messages',
-            security: AICS_Admin_Config.nonce,
-            chat_id: chatId
-        }).done(function(response) {
-            if (response.success) {
-                displayMessages(response.data.messages);
-            }
-        });
-    }
-    
-    function displayMessages(messages) {
-        const $container = $('#aics-modal-messages');
-        $container.empty();
-        
-        messages.forEach(msg => {
-            const time = new Date(parseInt(msg.ts)).toLocaleString();
-            const $msg = $(`
-                <div class="aics-message-item ${msg.sender}">
-                    <div class="aics-message-sender">${msg.sender}</div>
-                    <div class="aics-message-text">${msg.text}</div>
-                    <div class="aics-message-time">${time}</div>
-                </div>
-            `);
-            $container.append($msg);
-        });
-        
-        $container.scrollTop($container[0].scrollHeight);
-    }
-    
-    // Event handlers for archive page
-    $('#aics-search-btn').on('click', function() {
-        currentPage = 1;
-        loadChats(
-            currentPage,
-            $('#aics-search-input').val(),
-            $('#aics-sender-filter').val(),
-            $('#aics-date-from').val(),
-            $('#aics-date-to').val()
-        );
-    });
-    
-    $('#aics-clear-filters').on('click', function() {
-        $('#aics-search-input, #aics-sender-filter, #aics-date-from, #aics-date-to').val('');
-        currentPage = 1;
-        loadChats();
-    });
-    
-    $(document).on('click', '.page-btn', function() {
-        currentPage = parseInt($(this).data('page'));
-        loadChats(
-            currentPage,
-            $('#aics-search-input').val(),
-            $('#aics-sender-filter').val(),
-            $('#aics-date-from').val(),
-            $('#aics-date-to').val()
-        );
-    });
-    
-    $(document).on('click', '.aics-chat-item', function() {
-        loadChatMessages($(this).data('chat-id'));
-    });
-    
-    $('.aics-close-modal').on('click', function() {
-        $('#aics-chat-modal').hide();
-    });
-    
-    // Load initial data
-    loadChats();
 });

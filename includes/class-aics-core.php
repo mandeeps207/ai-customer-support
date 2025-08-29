@@ -57,6 +57,10 @@ class AICS_Core {
         add_action( 'wp_ajax_aics_server_ai', [ $this, 'server_ai_endpoint' ] );
         add_action( 'wp_ajax_nopriv_aics_server_ai', [ $this, 'server_ai_endpoint' ] );
 
+        // Register the AJAX action for generating Firebase custom tokens
+        add_action( 'wp_ajax_generate_firebase_custom_token', [ $this, 'generate_firebase_custom_token' ] );
+        add_action( 'wp_ajax_nopriv_generate_firebase_custom_token', [ $this, 'generate_firebase_custom_token' ] );
+
         // AJAX endpoint to save chat/message to wpdb
         add_action( 'wp_ajax_aics_save_message', [ $this, 'save_message_endpoint' ] );
         add_action( 'wp_ajax_nopriv_aics_save_message', [ $this, 'save_message_endpoint' ] );

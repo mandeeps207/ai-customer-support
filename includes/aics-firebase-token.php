@@ -1,7 +1,5 @@
-
 <?php
-// This file provides a REST endpoint to generate a Firebase custom token for WordPress admins
-// Place your Firebase service account JSON in the plugin directory as firebase-service-account.json
+// REST endpoint to generate Firebase custom token for WP admins
 
 use Kreait\Firebase\Factory;
 
@@ -10,12 +8,13 @@ add_action('rest_api_init', function() {
         'methods' => 'GET',
         'callback' => 'aics_generate_firebase_custom_token',
         'permission_callback' => function() {
-            return current_user_can('manage_options'); // Only admins
+            return current_user_can('manage_options'); // admin-only
         }
     ]);
 });
 
 function aics_generate_firebase_custom_token(WP_REST_Request $request) {
+    error_log('token generation started');
     $user = wp_get_current_user();
     if (!$user || !$user->ID) {
         return new WP_Error('not_logged_in', 'User not logged in', ['status' => 403]);
@@ -24,19 +23,26 @@ function aics_generate_firebase_custom_token(WP_REST_Request $request) {
     $uid = 'wpadmin_' . $user->ID;
     $displayName = $user->display_name;
 
-    // Load service account
-    $serviceAccountPath = plugin_dir_path(__FILE__) . '../firebase-service-account.json';
+    // Path to service account JSON inside plugin
+    $serviceAccountPath = AICS_DIR . 'firebase-service-account.json';
+
     if (!file_exists($serviceAccountPath)) {
         return new WP_Error('no_service_account', 'Firebase service account file missing', ['status' => 500]);
     }
 
-    require_once __DIR__ . '/../vendor/autoload.php';
+    require_once AICS_DIR . 'vendor/autoload.php';
 
     $factory = (new Factory)->withServiceAccount($serviceAccountPath);
     $auth = $factory->createAuth();
 
-    $customClaims = [ 'admin' => true, 'displayName' => $displayName ];
+    $customClaims = [ 
+        'admin' => true, 
+        'displayName' => $displayName 
+    ];
+
     $token = $auth->createCustomToken($uid, $customClaims);
 
-    return [ 'token' => (string)$token ];
+    error_log('Token:' . $token->toString());
+
+    return [ 'token' => $token->toString() ];
 }

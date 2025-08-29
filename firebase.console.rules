@@ -1,0 +1,28 @@
+{
+  "rules": {
+    "chats": {
+      "$chatId": {
+        ".read": "auth != null && (auth.uid == $chatId || auth.token.isAdmin === true)",
+        ".write": "auth != null && (auth.uid == $chatId || auth.token.isAdmin === true)",
+        "messages": {
+          ".read": "auth != null && (auth.uid == $chatId || auth.token.isAdmin === true)",
+          ".write": "auth != null && (auth.uid == $chatId || auth.token.isAdmin === true)"
+        },
+        "status": {
+          ".read": "auth != null && (auth.uid == $chatId || auth.token.isAdmin === true)",
+          ".write": "auth != null && (auth.uid == $chatId || auth.token.isAdmin === true)"
+        }
+      }
+    },
+    "admin_status": {
+      ".read": "auth != null",
+      ".write": "auth != null && auth.token.isAdmin === true"
+    },
+    "requests": {
+      "$requestId": {
+        ".read": "auth != null && (auth.uid == $requestId || auth.token.isAdmin === true)",
+        ".write": "auth != null && (auth.uid == $requestId || auth.token.isAdmin === true)"
+      }
+    }
+  }
+}
