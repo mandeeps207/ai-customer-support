@@ -192,6 +192,11 @@ jQuery(function ($) {
             $('#aics-agent-connected-msg').hide();
             // Clear chatId so a new chat starts next time
             localStorage.removeItem('aics_chat_id');
+            // Delete chat data from Firebase after short delay
+            setTimeout(function() {
+                db.ref('chats/' + chatId).remove();
+                db.ref('requests/' + chatId).remove();
+            }, 1200);
         } else {
             $('#aics-status').hide();
             $('#aics-connect-agent-row').hide();

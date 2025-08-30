@@ -14,11 +14,15 @@ define( 'AICS_URL', plugin_dir_url( __FILE__ ) );
 
 // Load core
 require_once AICS_DIR . 'includes/class-aics-core.php';
+
 // Load Firebase custom token REST endpoint
 require_once AICS_DIR . 'includes/aics-firebase-token.php';
 
+// Load Database file
+require_once AICS_DIR . 'includes/class-aics-db.php';
+
 // Install DB tables on activation
-register_activation_hook(__FILE__, ['AICS_Core', 'install_tables']);
+register_activation_hook(__FILE__, ['AICS_DB', 'install_tables']);
 
 // Init
 add_action( 'plugins_loaded', function() {

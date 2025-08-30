@@ -192,10 +192,20 @@ jQuery(function ($) {
         const text = $('#aics-agent-input').val().trim();
         if (!text) return;
         $('#aics-agent-input').val('');
+        const ts = Date.now();
         db.ref('chats/' + activeChatId + '/messages').push({
             sender: 'agent',
             text: text,
-            ts: Date.now()
+            ts: ts
+        });
+        // Also save to WP database via AJAX
+        $.post(AICS_Admin_Config.ajaxUrl, {
+            action: 'aics_save_message',
+            security: AICS_Admin_Config.nonce,
+            chat_id: activeChatId,
+            sender: 'agent',
+            text: text,
+            ts: ts
         });
     }
 
@@ -203,6 +213,11 @@ jQuery(function ($) {
     $('#aics-agent-close-btn').on('click', function() {
         if (!activeChatId) return;
         db.ref('chats/' + activeChatId + '/status').set('closed');
+        // Delete chat data from Firebase after short delay to allow UI update
+        setTimeout(function() {
+            db.ref('chats/' + activeChatId).remove();
+            db.ref('requests/' + activeChatId).remove();
+        }, 1200);
         $('#aics-agent-input, #aics-agent-send-btn').prop('disabled', true);
         $('#aics-agent-closed-msg').show();
     });
@@ -331,4 +346,128 @@ jQuery(function ($) {
             }
         });
     });
+
+    // --- Chat Archive (Admin) ---
+    // Only run on archive page
+    if (document.getElementById('aics-chats-list')) {
+        let currentPage = 1;
+        let perPage = 10;
+
+        function fetchArchives(page = 1) {
+            $('#aics-loading').show();
+            $('#aics-chats-list').empty();
+            $('#aics-pagination').empty();
+            const search = $('#aics-search-input').val() || '';
+            const sender = $('#aics-sender-filter').val() || '';
+            const dateFrom = $('#aics-date-from').val() || '';
+            const dateTo = $('#aics-date-to').val() || '';
+            $.post(AICS_Admin_Config.ajaxUrl, {
+                action: 'aics_search_archives',
+                security: AICS_Admin_Config.nonce,
+                page: page,
+                per_page: perPage,
+                search: search,
+                sender: sender,
+                date_from: dateFrom,
+                date_to: dateTo
+            }, function(res) {
+                $('#aics-loading').hide();
+                if (!res.success || !res.data.chats.length) {
+                    $('#aics-chats-list').html('<div style="padding:32px;text-align:center;color:#888;">No chats found.</div>');
+                    $('#aics-pagination').empty();
+                    return;
+                }
+                renderArchives(res.data.chats);
+                renderPagination(res.data.pagination);
+            });
+        }
+
+        function renderArchives(chats) {
+            $('#aics-chats-list').empty();
+            chats.forEach(function(chat) {
+                const started = chat.started_at ? new Date(chat.started_at.replace(' ', 'T')).toLocaleString() : '';
+                const preview = chat.first_message ? chat.first_message.substring(0, 80) : '';
+                const msgCount = chat.message_count || 0;
+                $('#aics-chats-list').append(`
+                    <div class="aics-chat-item" data-chat-id="${chat.chat_id}">
+                        <div class="aics-chat-header">
+                            <span class="aics-chat-id">${chat.chat_id}</span>
+                            <span class="aics-chat-date">${started}</span>
+                        </div>
+                        <div class="aics-chat-preview">${preview}</div>
+                        <div class="aics-chat-stats">Messages: ${msgCount} | Status: ${chat.status}</div>
+                    </div>
+                `);
+            });
+        }
+
+        function renderPagination(pagination) {
+            const { current_page, total_pages } = pagination;
+            if (total_pages <= 1) return;
+            let html = '';
+            for (let i = 1; i <= total_pages; i++) {
+                html += `<button class="${i === current_page ? 'active' : ''}" data-page="${i}">${i}</button>`;
+            }
+            $('#aics-pagination').html(html);
+        }
+
+        // Pagination click
+        $('#aics-pagination').on('click', 'button', function() {
+            const page = parseInt($(this).data('page'));
+            if (!isNaN(page)) {
+                currentPage = page;
+                fetchArchives(currentPage);
+            }
+        });
+
+        // Search/filter
+        $('#aics-search-btn').on('click', function() {
+            currentPage = 1;
+            fetchArchives(currentPage);
+        });
+        $('#aics-clear-filters').on('click', function() {
+            $('#aics-search-input').val('');
+            $('#aics-sender-filter').val('');
+            $('#aics-date-from').val('');
+            $('#aics-date-to').val('');
+            currentPage = 1;
+            fetchArchives(currentPage);
+        });
+
+        // Chat item click: fetch and show messages in modal
+        $('#aics-chats-list').on('click', '.aics-chat-item', function() {
+            const chatId = $(this).data('chat-id');
+            $('#aics-modal-messages').html('<div style="padding:32px;text-align:center;color:#888;">Loading...</div>');
+            $('#aics-chat-modal').show();
+            $.post(AICS_Admin_Config.ajaxUrl, {
+                action: 'aics_get_chat_messages',
+                security: AICS_Admin_Config.nonce,
+                chat_id: chatId
+            }, function(res) {
+                if (!res.success || !res.data.messages.length) {
+                    $('#aics-modal-messages').html('<div style="padding:32px;text-align:center;color:#888;">No messages found.</div>');
+                    return;
+                }
+                let html = '';
+                res.data.messages.forEach(function(msg) {
+                    const who = msg.sender.charAt(0).toUpperCase() + msg.sender.slice(1);
+                    const time = msg.ts ? new Date(parseInt(msg.ts)).toLocaleString() : '';
+                    html += `<div class="aics-message-item ${msg.sender}">
+                        <div class="aics-message-sender">${who}</div>
+                        <div class="aics-message-text">${msg.text}</div>
+                        <div class="aics-message-time">${time}</div>
+                    </div>`;
+                });
+                $('#aics-modal-messages').html(html);
+            });
+        });
+
+        // Modal close
+        $('#aics-chat-modal').on('click', '.aics-close-modal', function() {
+            $('#aics-chat-modal').hide();
+        });
+
+        // Initial fetch
+        fetchArchives(currentPage);
+    }
 });
