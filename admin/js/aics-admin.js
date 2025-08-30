@@ -134,12 +134,18 @@ jQuery(function ($) {
         activeChatId = chatId;
         currentActiveChatId = chatId;
         $('#aics-agent-chat').show();
+
         $('#aics-agent-messages').empty();
         $('#aics-agent-input').val('');
         $('#aics-agent-closed-msg').hide();
+        // Add typing indicator if not present
+        if ($('#aics-agent-typing-indicator').length === 0) {
+            $('#aics-agent-messages').after('<div id="aics-agent-typing-indicator" style="display:none;padding:0 8px 8px 8px;font-size:14px;color:#888;"><span id="aics-agent-typing-text">User is typing...</span></div>');
+        }
 
         // Remove previous listener
         if (messagesRef) messagesRef.off();
+
 
         // Listen for messages
         messagesRef = db.ref('chats/' + chatId + '/messages');
@@ -157,6 +163,16 @@ jQuery(function ($) {
                 setLastReadTs(chatId, d.ts);
                 unreadCounts[chatId] = 0;
                 updateUnreadBadge(chatId);
+            }
+        });
+
+        // Listen for user typing
+        db.ref('chats/' + chatId + '/typing/user').on('value', function(snap) {
+            if (snap.val()) {
+                $('#aics-agent-typing-indicator').show();
+                $('#aics-agent-typing-text').text('User is typing...');
+            } else {
+                $('#aics-agent-typing-indicator').hide();
             }
         });
 
@@ -184,9 +200,30 @@ jQuery(function ($) {
     // Send agent message
     $('#aics-agent-send-btn').on('click', sendAgentMessage);
 
+
+    // Typing indicator logic for agent
+    let agentTypingTimeout = null;
+    let agentIsTyping = false;
+    function setAgentTyping(status) {
+        if (activeChatId) {
+            db.ref('chats/' + activeChatId + '/typing/agent').set(status);
+        }
+    }
+    $('#aics-agent-input').on('input', function() {
+        if (!agentIsTyping) {
+            agentIsTyping = true;
+            setAgentTyping(true);
+        }
+        if (agentTypingTimeout) clearTimeout(agentTypingTimeout);
+        agentTypingTimeout = setTimeout(function() {
+            agentIsTyping = false;
+            setAgentTyping(false);
+        }, 1200);
+    });
     $('#aics-agent-input').on('keydown', function(e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
+            setAgentTyping(false);
             sendAgentMessage();
         }
     });
@@ -195,7 +232,9 @@ jQuery(function ($) {
         if (!activeChatId) return;
         const text = $('#aics-agent-input').val().trim();
         if (!text) return;
-        $('#aics-agent-input').val('');
+    $('#aics-agent-input').val('');
+    // Set agent typing to false after sending
+    setAgentTyping(false);
         const ts = Date.now();
         db.ref('chats/' + activeChatId + '/messages').push({
             sender: 'agent',

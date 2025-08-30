@@ -181,10 +181,39 @@ jQuery(function ($) {
 
     $('#aics-send-btn').on('click', sendUserMessage);
 
+
+    // Typing indicator logic
+    let typingTimeout = null;
+    let isTyping = false;
+    function setUserTyping(status) {
+        db.ref('chats/' + chatId + '/typing/user').set(status);
+    }
+    $('#aics-user-input').on('input', function() {
+        if (!isTyping) {
+            isTyping = true;
+            setUserTyping(true);
+        }
+        if (typingTimeout) clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(function() {
+            isTyping = false;
+            setUserTyping(false);
+        }, 1200);
+    });
     $('#aics-user-input').on('keydown', function(e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
+            setUserTyping(false);
             sendUserMessage();
+        }
+    });
+
+    // Listen for agent typing
+    db.ref('chats/' + chatId + '/typing/agent').on('value', function(snap) {
+        if (snap.val()) {
+            $('#aics-typing-indicator').show();
+            $('#aics-typing-text').text(agentName ? agentName + ' is typing...' : 'Agent is typing...');
+        } else {
+            $('#aics-typing-indicator').hide();
         }
     });
 

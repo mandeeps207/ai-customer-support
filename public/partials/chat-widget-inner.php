@@ -10,6 +10,9 @@
         </div>
     </div>
     <div id="aics-messages"></div>
+    <div id="aics-typing-indicator" style="display:none;padding:0 18px 8px 18px;font-size:14px;color:#888;">
+        <span id="aics-typing-text">Agent is typing...</span>
+    </div>
     <div id="aics-status" style="display:none;"></div>
     <div id="aics-chat-closed-msg" style="display:none;">This chat session has been closed by the agent.</div>
     <div id="aics-agent-connected-msg" style="display:none;">A human agent is now handling your chat.</div>
