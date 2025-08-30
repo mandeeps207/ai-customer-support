@@ -39,6 +39,26 @@ jQuery(function ($) {
         localStorage.setItem('aics_chat_id', chatId);
     }
 
+    // 2a. Agent info cache
+    let agentName = '';
+    let agentPhoto = '';
+
+    // 2b. Function to update agent heading
+    function updateAgentHeading() {
+        if (agentName) {
+            $('#aics-agent-name').text(agentName);
+            if (agentPhoto) {
+                $('#aics-agent-photo').attr('src', agentPhoto);
+                $('#aics-agent-photo-wrap').show();
+            } else {
+                $('#aics-agent-photo-wrap').hide();
+            }
+        } else {
+            $('#aics-agent-name').text('');
+            $('#aics-agent-photo-wrap').hide();
+        }
+    }
+
     // 3. Listen for admin online status
     let aicsIsAgentOnline = false;
     let aicsChatStatus = null; // Track current chat status
@@ -88,12 +108,12 @@ jQuery(function ($) {
             $('#aics-online-status-notification')
                 .removeClass('aics-online').addClass('aics-offline')
                 .removeClass('aics-online').addClass('aics-status-pill aics-offline')
-            $('#aics-online-status-notification .aics-status-text').text('We Are Offline');
+            $('#aics-online-status-notification .aics-status-text').text('Offline');
         } else {
             $('#aics-online-status-notification')
                 .removeClass('aics-offline').addClass('aics-online')
                 .removeClass('aics-offline').addClass('aics-status-pill aics-online')
-            $('#aics-online-status-notification .aics-status-text').text('We Are Online');
+            $('#aics-online-status-notification .aics-status-text').text('Online');
         }
         updateAgentConnectedMsg();
     });
@@ -168,6 +188,19 @@ jQuery(function ($) {
         }
     });
 
+    // 4a. Listen for assigned agent info and update heading
+    db.ref('chats/' + chatId + '/assigned_agent').on('value', function(snap) {
+        const data = snap.val();
+        if (data && data.name) {
+            agentName = data.name;
+            agentPhoto = data.photo_url || '';
+        } else {
+            agentName = '';
+            agentPhoto = '';
+        }
+        updateAgentHeading();
+    });
+
     // 5. Listen for messages
     db.ref('chats/' + chatId + '/messages').on('child_added', function (snap) {
         const d = snap.val();
@@ -175,11 +208,20 @@ jQuery(function ($) {
         let whoClass = 'bot';
         if (d.sender === 'user') whoClass = 'user';
         else if (d.sender === 'agent') whoClass = 'agent';
-        $('#aics-messages').append(
-            $('<div>').addClass('aics-message ' + whoClass).append(
-                $('<div>').addClass('aics-bubble').text(d.text)
-            )
+
+        // For agent messages, show photo
+        let $msg = $('<div>').addClass('aics-message ' + whoClass);
+        if (d.sender === 'agent' && agentPhoto) {
+            $msg.append(
+                $('<img>').attr('src', agentPhoto).attr('alt', 'Agent Photo').css({
+                    width: '28px', height: '28px', 'border-radius': '50%', 'object-fit': 'cover', 'margin-right': '8px', 'align-self': 'flex-end'
+                })
+            );
+        }
+        $msg.append(
+            $('<div>').addClass('aics-bubble').text(d.text)
         );
+        $('#aics-messages').append($msg);
         $('#aics-messages').scrollTop($('#aics-messages')[0].scrollHeight);
     });
 

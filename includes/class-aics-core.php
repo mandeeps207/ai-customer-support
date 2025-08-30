@@ -51,7 +51,6 @@ class AICS_Core {
         wp_enqueue_script( 'firebase-app', 'https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js', [], null, true );
         wp_enqueue_script( 'firebase-auth', 'https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js', [ 'firebase-app' ], null, true );
         wp_enqueue_script( 'firebase-database', 'https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js', [ 'firebase-app', 'firebase-auth' ], null, true );
-        wp_enqueue_script( 'fontawesome_icons', 'https://kit.fontawesome.com/1ad78acfd0.js', [], null, true );
         wp_enqueue_script( 'aics-public', AICS_URL . 'public/js/aics-public.js', [ 'jquery', 'firebase-app', 'firebase-auth', 'firebase-database' ], '1.0.0', true );
         wp_localize_script( 'aics-public', 'AICS_Config', [
             'apiKey'    => $api_key,
@@ -72,13 +71,13 @@ class AICS_Core {
 
         // Fetch Firebase custom token for admin
         $token = '';
+        $admin_name = '';
+        $admin_avatar = '';
         if (current_user_can('manage_options')) {
-            $response = wp_remote_get( rest_url('aics/v1/firebase-token') );
-            if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200) {
-                $body = json_decode(wp_remote_retrieve_body($response), true);
-                if (!empty($body['token'])) {
-                    $token = $body['token'];
-                }
+            $user = wp_get_current_user();
+            $admin_name = $user ? $user->display_name : '';
+            if (function_exists('get_avatar_url')) {
+                $admin_avatar = get_avatar_url($user->ID);
             }
         }
         wp_localize_script( 'aics-admin', 'AICS_Admin_Config', [
@@ -86,7 +85,8 @@ class AICS_Core {
             'projectId' => $project_id,
             'ajaxUrl'   => admin_url( 'admin-ajax.php' ),
             'nonce'     => wp_create_nonce( 'aics_nonce' ),
-            'firebaseCustomToken' => $token,
+            'adminName' => $admin_name,
+            'adminAvatar' => $admin_avatar,
         ]);
 
         // Localize script for REST API requests for logged-in users

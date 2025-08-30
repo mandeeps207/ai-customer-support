@@ -1,11 +1,13 @@
 <div id="aics-chatbox">
     <div id="aics-chatbox-header">
-        <h3 class="aics-chatbox-title">AI Customer Support</h3>
+        <h3 class="aics-chatbox-title">
+            <span id="aics-agent-photo-wrap" style="display:none;"><img id="aics-agent-photo" src="" alt="Agent Photo" style="width:32px;height:32px;border-radius:50%;object-fit:cover;margin-right:8px;vertical-align:middle;"></span>
+            <span id="aics-agent-name"></span>
+        </h3>
         <div id="aics-online-status-notification" class="aics-status-pill">
             <span class="aics-status-dot"></span>
             <span class="aics-status-text"></span>
         </div>
-    <!-- <div id="aics-chatbox-welcome" class="aics-chatbox-welcome"></div> -->
     </div>
     <div id="aics-messages"></div>
     <div id="aics-status" style="display:none;"></div>
@@ -13,7 +15,7 @@
     <div id="aics-agent-connected-msg" style="display:none;">A human agent is now handling your chat.</div>
     <div id="aics-input-row">
         <input id="aics-user-input" type="text" placeholder="Type your message..." autocomplete="off" />
-        <button id="aics-send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+        <button id="aics-send-btn"><img src="<?php echo AICS_URL . 'public/send-btn-icon.png'; ?>"></button>
     </div>
     <div id="aics-connect-agent-row" style="display:none;">
         <button id="aics-connect-agent-btn">Connect to Agent</button>

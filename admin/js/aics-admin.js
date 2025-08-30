@@ -116,9 +116,13 @@ jQuery(function ($) {
     // Accept chat
     $('#aics-requests-list').on('click', '.aics-accept-btn', function() {
         const chatId = $(this).data('chat-id');
+        // Use localized admin name and avatar if available
+        const agentName = (typeof AICS_Admin_Config !== 'undefined' && AICS_Admin_Config.adminName) ? AICS_Admin_Config.adminName : 'Agent';
+        const agentAvatar = (typeof AICS_Admin_Config !== 'undefined' && AICS_Admin_Config.adminAvatar) ? AICS_Admin_Config.adminAvatar : '';
         db.ref('chats/' + chatId + '/status').set('active');
         db.ref('chats/' + chatId + '/assigned_agent').set({
-            name: 'Agent',
+            name: agentName,
+            photo_url: agentAvatar,
             accepted_at: Date.now()
         });
         db.ref('requests/' + chatId).remove();
